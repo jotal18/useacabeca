@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Guitar Wars - Approve a High Score</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<h2>Guitar Wars - Approve a High Score</h2>
+
+<?php 
+
+	require_once('appvars.php');
+  	require_once('connectvars.php');
+  	require_once('authorize.php');
+  
+	if (isset($_GET['id']) && isset($_GET['date']) && isset($_GET['name']) && isset($_GET['score']) && isset($_GET['screenshot'])) {
+	  
+		$id = $_GET['id'];
+		$date = $_GET['date'];
+		$name = $_GET['name'];
+		$score = $_GET['score'];
+		$screenshot = $_GET['screenshot'];
+
+	}elseif (isset($_POST['id']) && isset($_POST['name']) && isset($_POST['score'])) {
+
+		$id = $_POST['id'];
+		$name = $_POST['name'];
+		$score = $_POST['score'];
+
+
+	}else{
+
+		echo '<p class="error">Sorry, no high score was specified for approval.</p>';
+	}
+
+	//var_dump($id, $date, $score);
+
+	
+	if (isset($_POST['submit'])) {
+		if (($_POST['confirm']) == 'yes') {
+		
+			//Conecte ao banco de dados
+	      	$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) or die ('Erro ao conectar com o banco de dados.');
+			
+			//Aprova a pontuação,definindo a coluna approved do banco de dados
+			$query = "UPDATE guitarwars SET aproved = 1 WHERE id = $id";
+			mysqli_query($dbc, $query);
+
+			mysqli_close($dbc);
+			
+			// Confirma êxito com o usuário
+			echo '<p>The high score of ' . $score . ' para ' . $name . ' was successfully approved.</p>';
+
+		}else{
+
+			echo '<p class="error">Sorry, there was a problem approving the high score.</p>';
+		}
+	}elseif (isset($id) && isset($date) && isset($name) && isset($score)) {
+
+		$teste = '<p>Are sure you want to delete the following high score?</p>';
+	    $teste .= '<p><strong>Name: </strong>' . $name . '<br/>';
+	    $teste .= '<strong>Date: </strong>' . $date . '<br/>';
+	    $teste .= '<strong>Score: </strong>' . $score . '</p>';
+	    $teste .= '<form method="post" action="approvescore.php">';
+	    $teste .= '<input type="radio" name="confirm" value="yes">Yes';
+	    $teste .= '<input type="radio" name="confirm" value="no" checked="checked">No<br/>';
+	    $teste .= '<input type="submit" name="submit" value="Enviar">';
+
+	    $teste .= '<input type="hidden" name="id" value="' . $id . '">';
+	    $teste .= '<input type="hidden" name="name" value="' . $name . '">';
+	    $teste .= '<input type="hidden" name="score" value="' . $score . '">';
+
+	    $teste .= '</form>';
+
+	    echo $teste;
+	}
+
+	echo '<p><a href="admin.php">Voltar</a></p>';
+?>
+
+</body>
+</html>
